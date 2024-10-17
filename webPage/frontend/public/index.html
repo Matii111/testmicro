@@ -1,15 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Station</title>
+    <title>Estacion meteorologica</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
+
+    <script>
+        const jsonData = 'http://localhost:5000/api/data.json';
+        fetch(jsonData)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {                 
+                const firstEntry = data.data[0];
+                document.getElementById('temperatura').textContent = `Temperatura: ${firstEntry.temperatura} °C`;
+                document.getElementById('nivelCO2').textContent = `Nivel de CO2: ${firstEntry.co2} ppm`;
+                document.getElementById('nivelHumedad').textContent = `Nivel de Humedad: ${firstEntry.humedad} %`;
+                document.getElementById('nivelRayosUV').textContent = `Nivel de Rayos UV: ${firstEntry.uvs}`;
+                document.getElementById('intensidadLuminica').textContent = `Intensidad Luminica: ${firstEntry.luminica} lux`;
+           })
+            .catch(error => {
+                console.error('Error al obtener datos:', error);
+            });
+    </script>
     <div id="app">
-        <h1>Weather Station</h1>
+        <h1>Estación Meteorológica</h1>
+        <p id="temperatura">Temperatura: Cargando...</p>
+        <p id="nivelCO2">Nivel de CO2: Cargando...</p>
+        <p id="nivelHumedad">Nivel de Humedad: Cargando...</p>
+        <p id="nivelRayosUV">Nivel de Rayos UV: Cargando...</p>
+        <p id="intensidadLuminica">Intensidad Luminica: Cargando...</p>
     </div>
     <script src="app.js"></script>
 </body>
+
 </html>
