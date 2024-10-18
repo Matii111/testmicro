@@ -28,9 +28,9 @@ app.use(
         target: `http://localhost:3000`,
         changeOrigin: true,
         pathRewrite: {
-            '^/data.json': '/data.json', // No rewrite needed, just redirect
+            '^/data.json': '/data.json',
         },
-        logLevel: 'debug', // Optional: Useful for debugging proxy issues
+        logLevel: 'debug',
     })
 );
 
