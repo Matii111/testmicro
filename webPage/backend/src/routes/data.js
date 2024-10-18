@@ -3,9 +3,12 @@ const router = express.Router();
 const DataModel = require('../model/dataModel');
 
 
+const app = express();
+app.use(express.json()); 
+
 router.post('/DataSave', async (req, res) => {
     try {
-        const dataArray = req.body;
+        const dataArray = req.body; 
         const savedData = await DataModel.insertMany(dataArray);
         res.json(savedData);
     } catch (err) {

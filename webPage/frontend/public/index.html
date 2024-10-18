@@ -13,8 +13,26 @@
     <script>
         const jsonData = 'http://localhost:5000/data.json';
         const savedDataArray = [];
+        //find data from json
+        async function fetchData() {
+            try {
+                const response = await fetch(jsonData);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
 
-        // Saves all data
+                const dataString = await response.text();
+                const data = JSON.parse(dataString);
+
+                updateUI(data);
+                saveData(data);
+                saveDataToLocalStorage();
+
+            } catch (error) {
+                console.error('Error al obtener datos:', error);
+            }
+        }
+        //saves all data as arrays
         function saveData(data) {
             const combinedData = [...data.COM5, ...data.COM6];
             combinedData.forEach(dataIndex => savedDataArray.push({
@@ -22,8 +40,7 @@
                 ...dataIndex
             }));
         }
-
-        // Transfers data to local storage
+        // transfers data to local storage
         function saveDataToLocalStorage() {
             if (savedDataArray.length === 0) {
                 console.warn('No hay datos para guardar');
@@ -33,32 +50,13 @@
             console.log('Datos guardados en localStorage');
             updateDisplay();
         }
-
-        // Shows updated data on display
+        //shows updated data on display
         function updateDisplay() {
             const displayElement = document.getElementById('saved-content');
             const savedData = localStorage.getItem('savedData');
             displayElement.textContent = savedData ? JSON.stringify(JSON.parse(savedData), null, 2) : 'No hay datos disponibles aún.';
         }
-
-        async function fetchData() {
-            try {
-                const response = await fetch(jsonData); // Realiza la solicitud
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                const dataString = await response.text(); // Obtiene la respuesta como cadena de texto
-                const data = JSON.parse(dataString); // Convierte la cadena de texto a objeto JSON
-
-                updateUI(data); // Llama a la función para actualizar la interfaz de usuario con el objeto JSON
-                saveData(data); // Llama a la función para guardar los datos
-                saveDataToLocalStorage(); // Llama a la función para guardar en el almacenamiento local
-            } catch (error) {
-                console.error('Error al obtener datos:', error);
-            }
-        }
-
+        //upload data to db
         async function uploadDataToServer() {
             const savedData = localStorage.getItem('savedData');
             if (!savedData) {
@@ -74,9 +72,9 @@
                 const response = await fetch('/api/DataSave', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'text/plain'
+                        'Content-Type': 'application/json'
                     },
-                    body: stringData
+                    body: JSON.stringify(parsedData)
                 });
 
                 if (!response.ok) {
@@ -91,8 +89,8 @@
         }
 
         function updateUI(data) {
-            const arduino1 = data.COM5 || [];
-            const arduino2 = data.COM6 || [];
+            const arduino1 = data.COM5;
+            const arduino2 = data.COM6;
 
             if (arduino1.length > 0) {
                 arduino1.forEach(index => {
@@ -123,7 +121,7 @@
         }
 
         initialize();
-        setInterval(initialize, 10000);
+        setInterval(initialize, 100000);
 
     </script>
 
