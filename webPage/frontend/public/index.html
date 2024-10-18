@@ -4,42 +4,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estacion meteorologica</title>
+    <title>Estación Meteorológica</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
     <script>
-        const jsonData = 'http://localhost:5000/api/data.json';
-        fetch(jsonData)
-            .then(response => {
+        const jsonData = 'http://localhost:5000/data.json';
+        const savedDataArray = [];
+
+        // Saves all data
+        function saveData(data) {
+            const combinedData = [...data.COM5, ...data.COM6];
+            combinedData.forEach(dataIndex => savedDataArray.push({
+                timestamp: new Date().toISOString(),
+                ...dataIndex
+            }));
+        }
+
+        // Transfers data to local storage
+        function saveDataToLocalStorage() {
+            if (savedDataArray.length === 0) {
+                console.warn('No hay datos para guardar');
+                return;
+            }
+            localStorage.setItem('savedData', JSON.stringify(savedDataArray));
+            console.log('Datos guardados en localStorage');
+            updateDisplay();
+        }
+
+        // Shows updated data on display
+        function updateDisplay() {
+            const displayElement = document.getElementById('saved-content');
+            const savedData = localStorage.getItem('savedData');
+            displayElement.textContent = savedData ? JSON.stringify(JSON.parse(savedData), null, 2) : 'No hay datos disponibles aún.';
+        }
+
+        async function fetchData() {
+            try {
+                const response = await fetch(jsonData); // Realiza la solicitud
                 if (!response.ok) {
-                    throw new Error(`Error: ${response.status}`);
+                    throw new Error('Network response was not ok');
                 }
-                return response.json();
-            })
-            .then(data => {                 
-                const firstEntry = data.data[0];
-                document.getElementById('temperatura').textContent = `Temperatura: ${firstEntry.temperatura} °C`;
-                document.getElementById('nivelCO2').textContent = `Nivel de CO2: ${firstEntry.co2} ppm`;
-                document.getElementById('nivelHumedad').textContent = `Nivel de Humedad: ${firstEntry.humedad} %`;
-                document.getElementById('nivelRayosUV').textContent = `Nivel de Rayos UV: ${firstEntry.uvs}`;
-                document.getElementById('intensidadLuminica').textContent = `Intensidad Luminica: ${firstEntry.luminica} lux`;
-           })
-            .catch(error => {
+
+                const dataString = await response.text(); // Obtiene la respuesta como cadena de texto
+                const data = JSON.parse(dataString); // Convierte la cadena de texto a objeto JSON
+
+                updateUI(data); // Llama a la función para actualizar la interfaz de usuario con el objeto JSON
+                saveData(data); // Llama a la función para guardar los datos
+                saveDataToLocalStorage(); // Llama a la función para guardar en el almacenamiento local
+            } catch (error) {
                 console.error('Error al obtener datos:', error);
-            });
+            }
+        }
+
+        async function uploadDataToServer() {
+            const savedData = localStorage.getItem('savedData');
+            if (!savedData) {
+                console.warn('No hay datos para enviar al servidor');
+                return;
+            }
+            try {
+                const parsedData = JSON.parse(savedData);
+                const stringData = parsedData.map(item =>
+                    `${item.timestamp},${item.id},${item.device},${item.temperatura},${item.co2},${item.humedad},${item.uvs},${item.luminica}`
+                ).join('\n');
+
+                const response = await fetch('/api/DataSave', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain'
+                    },
+                    body: stringData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error al enviar datos: ${response.status}`);
+                }
+                const result = await response.json();
+                console.log('Datos enviados al servidor:', parsedData);
+                console.log('Datos subidos exitosamente:', result);
+            } catch (error) {
+                console.error('Error al subir datos:', error);
+            }
+        }
+
+        function updateUI(data) {
+            const arduino1 = data.COM5 || [];
+            const arduino2 = data.COM6 || [];
+
+            if (arduino1.length > 0) {
+                arduino1.forEach(index => {
+                    document.getElementById('dispositivo1').textContent = `Arduino Uno: ${index.device || 'N/A'}`;
+                    document.getElementById('temperatura1').textContent = `Temperatura: ${index.temperatura || 'N/A'} °C`;
+                    document.getElementById('nivelCO21').textContent = `Nivel de CO2: ${index.co2 || 'N/A'} ppm`;
+                    document.getElementById('nivelHumedad1').textContent = `Nivel de Humedad: ${index.humedad || 'N/A'} %`;
+                    document.getElementById('nivelRayosUV1').textContent = `Nivel de Rayos UV: ${index.uvs || 'N/A'}`;
+                    document.getElementById('intensidadLuminica1').textContent = `Intensidad Luminica: ${index.luminica || 'N/A'} lux`;
+                });
+            }
+
+            if (arduino2.length > 0) {
+                arduino2.forEach(index => {
+                    document.getElementById('dispositivo2').textContent = `Arduino Uno: ${index.device || 'N/A'}`;
+                    document.getElementById('temperatura2').textContent = `Temperatura: ${index.temperatura || 'N/A'} °C`;
+                    document.getElementById('nivelCO22').textContent = `Nivel de CO2: ${index.co2 || 'N/A'} ppm`;
+                    document.getElementById('nivelHumedad2').textContent = `Nivel de Humedad: ${index.humedad || 'N/A'} %`;
+                    document.getElementById('nivelRayosUV2').textContent = `Nivel de Rayos UV: ${index.uvs || 'N/A'}`;
+                    document.getElementById('intensidadLuminica2').textContent = `Intensidad Luminica: ${index.luminica || 'N/A'} lux`;
+                });
+            }
+        }
+
+        async function initialize() {
+            await fetchData();
+            await uploadDataToServer();
+        }
+
+        initialize();
+        setInterval(initialize, 10000);
+
     </script>
-    <div id="app">
-        <h1>Estación Meteorológica</h1>
-        <p id="temperatura">Temperatura: Cargando...</p>
-        <p id="nivelCO2">Nivel de CO2: Cargando...</p>
-        <p id="nivelHumedad">Nivel de Humedad: Cargando...</p>
-        <p id="nivelRayosUV">Nivel de Rayos UV: Cargando...</p>
-        <p id="intensidadLuminica">Intensidad Luminica: Cargando...</p>
+
+    <div>
+        <h1 class="main-title">Estación Meteorológica</h1>
+        <div class="arduino-container">
+            <div class="left-container" id="app1">
+                <div>
+                    <h2 id="dispositivo1">Conectando dispositivo...</h2>
+                    <p id="temperatura1">Temperatura: Cargando...</p>
+                    <p id="nivelCO21">Nivel de CO2: Cargando...</p>
+                    <p id="nivelHumedad1">Nivel de Humedad: Cargando...</p>
+                    <p id="nivelRayosUV1">Nivel de Rayos UV: Cargando...</p>
+                    <p id="intensidadLuminica1">Intensidad Luminica: Cargando...</p>
+                </div>
+            </div>
+            <div class="left-container" id="app2">
+                <div>
+                    <h2 id="dispositivo2">Conectando dispositivo...</h2>
+                    <p id="temperatura2">Temperatura: Cargando...</p>
+                    <p id="nivelCO22">Nivel de CO2: Cargando...</p>
+                    <p id="nivelHumedad2">Nivel de Humedad: Cargando...</p>
+                    <p id="nivelRayosUV2">Nivel de Rayos UV: Cargando...</p>
+                    <p id="intensidadLuminica2">Intensidad Luminica: Cargando...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="data-display"
+            style="white-space: pre-wrap; background-color: #f3f3f3; padding: 10px; margin-top: 20px;">
+            <h2>Datos Guardados</h2>
+            <code id="saved-content">No hay datos disponibles aún.</code>
+        </div>
     </div>
-    <script src="app.js"></script>
+
 </body>
 
 </html>

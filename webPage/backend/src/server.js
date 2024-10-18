@@ -1,34 +1,55 @@
 require('dotenv').config();
+const connectDB = require('./db/mongoConfig');
 const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-const app = express();
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const DataRouter = require('./routes/data');
+
+const app = express();
 const PORT = process.env.BACKEND_PORT;
 const JSON = process.env.JSON_PORT;
+const MONGO = process.env.MONGO_URI;
 
 const corsConfig = {
     origin: `http://localhost:${JSON}`,
     methods: ['GET', 'POST'],
-    credentials: false
-}
+    credentials: false,
+};
 
 app.use(cors(corsConfig));
+app.use(express.json({ limit: '10mb' }));
 
-app.use('/api', createProxyMiddleware({
-    target: `http://localhost:${JSON}`,
-    changeOrigin: true,
-    pathRewrite: {
-        '^/api': '',
-    },
-}));
+app.use(cors({ origin: '*' }));
+app.use(
+    '/data.json',
+    createProxyMiddleware({
+        target: `http://localhost:3000`,
+        changeOrigin: true,
+        pathRewrite: {
+            '^/data.json': '/data.json', // No rewrite needed, just redirect
+        },
+        logLevel: 'debug', // Optional: Useful for debugging proxy issues
+    })
+);
 
 app.use(express.static(path.join(__dirname, '../../frontend/public')));
-
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../../frontend/public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-});
+app.use('/api', DataRouter);
+
+async function initApp() {
+    try {
+        await mongoose.connection.close();
+        await connectDB(MONGO);
+        app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+    } catch (err) {
+        console.error(err);
+        process.exit(1);
+    }
+}
+
+initApp(); 

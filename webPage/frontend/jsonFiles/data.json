@@ -1,58 +1,20 @@
 {
-  "data": [
+  "COM5": [
     {
-      "id": 1,
-      "temperatura": "23",
-      "co2": "50",
-      "humedad": "20",
-      "uvs": "5",
-      "luminica": "5"
-    },
-    {
-      "id": 2,
-      "temperatura": "24",
-      "co2": "55",
-      "humedad": "30",
-      "uvs": "7",
-      "luminica": "5"
-    },
-    {
-      "id": 3,
-      "temperatura": "22",
-      "co2": "50",
-      "humedad": "20",
-      "uvs": "5",
-      "luminica": "5"
-    },
-    {
-      "id": 4,
-      "temperatura": "21",
-      "co2": "50",
-      "humedad": "25",
-      "uvs": "5",
-      "luminica": "5"
-    },
-    {
-      "id": 5,
-      "temperatura": "29",
-      "co2": "50",
-      "humedad": "20",
-      "uvs": "5",
-      "luminica": "5"
-    },
-    {
-      "id": 6,
-      "temperatura": "44",
-      "co2": "20",
-      "humedad": "10",
-      "uvs": "5",
-      "luminica": "5"
-    },
-    {
-      "id": 7,
-      "temperatura": "32",
+      "device":"COM5",
+      "temperatura": "30",
       "co2": "50",
       "humedad": "22",
+      "uvs": "5",
+      "luminica": "5"
+    }
+  ],
+  "COM6": [
+    {
+      "device":"COM6",
+      "temperatura": "32",
+      "co2": "5",
+      "humedad": "21",
       "uvs": "5",
       "luminica": "5"
     }
