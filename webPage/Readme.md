@@ -28,5 +28,12 @@ npm run start
 - ~~Al recibir los datos con el backend crear script para enviarlos cada 24 horas a alguna base de datos o metodo de respaldo.~~
 - ~~Separar datos recibidos para dos interfaces distintas, separando por arduinos 1 y 2.~~
 - ~~Script que lea los datos cada 10 segundos.~~
-- Mejorar la interfaz visual (frontend).
-- Crear llamada para pedir los valores guardados en backend y funcion para ejecutarlo con un boton.
+- ~~Mejorar la interfaz visual (frontend).~~
+- ~~Crear llamada para pedir los valores guardados en backend y funcion para ejecutarlo con un boton.~~
+- Unir todo en conjunto.
+- Probablemente falle por:
+  - Nombres de las columnas.
+  - Puertos incorrectos.
+  - Sobrecarga de archivos locales.
+  - Se cierra la pagina de navegador.
+  - En general errores con cors.
