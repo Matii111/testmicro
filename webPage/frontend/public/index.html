@@ -13,6 +13,7 @@
     <script>
         const jsonData = 'http://localhost:5000/data.json';
         const savedDataArray = [];
+
         //download data from db
         async function downloadBackup() {
             const response = await fetch('/api/DataSave', {
@@ -24,10 +25,10 @@
                     throw new Error(`Error al descargar datos: ${response.status}`);
                 }
 
-                const data = await response.json(); 
+                const data = await response.json();
                 const keys = Object.keys(data[0]);
                 const csvContent = [
-                    keys.join(','), 
+                    keys.join(','),
                     ...data.map(item => keys.map(key => item[key]).join(','))
                 ].join('\n');
 
@@ -35,7 +36,7 @@
 
                 const downloadLink = document.createElement('a');
                 downloadLink.href = URL.createObjectURL(blob);
-                downloadLink.download = 'backup.csv'; 
+                downloadLink.download = 'backup.csv';
 
                 downloadLink.click();
                 URL.revokeObjectURL(downloadLink.href);
@@ -46,7 +47,29 @@
                 console.error('Error al descargar: ', error);
             }
         }
+        //download local data
+        function downloadLocal() {
+            const savedData = localStorage.getItem('savedData');
+            const parsedData = JSON.parse(savedData);
+            const stringData = parsedData.map(item =>
+                `${item.timestamp},${item.id},${item.device},${item.temperatura},${item.co2},${item.humedad},${item.uvs},${item.luminica}`
+            ).join('\n');
 
+            const keys = Object.keys(parsedData[0]);
+            const csvContent = [
+                keys.join(','),
+                ...parsedData.map(item => keys.map(key => item[key]).join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const downloadLink = document.createElement('a');
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.download = 'data_local.csv';
+            downloadLink.click();
+            URL.revokeObjectURL(downloadLink.href);
+
+            console.log('Documento descargado');
+        }
         //find data from json
         async function fetchData() {
             try {
@@ -151,6 +174,18 @@
             await fetchData();
         }
 
+        //confirm before close session
+        window.onbeforeunload = function (event) {
+            const message = "Seguro que quieres salir?";
+            event.returnValue = message;
+            return message;
+        };
+        //clear old localstore files
+        window.onload = function () {
+            localStorage.clear();
+            console.log('localStorage limpiado');
+        };
+
         setInterval(fetchData, 10000);
         setInterval(uploadDataToServer, 3600000);
 
@@ -187,8 +222,17 @@
             <h2>Datos Guardados</h2>
             <div>
                 <code id="saved-content" class="json-data">No hay datos disponibles aún.</code>
-                <button onclick="downloadBackup()">Descargar ultimo backup
-                </button>
+                <div class="buttons-container">
+                    <button onclick="downloadBackup()" title="Descarga los datos desde el backup">
+                        <img src="downloadBackup.svg" alt="Download from DB">
+                    </button>
+                    <button onclick="downloadLocal()" title="Descarga los datos actuales">
+                        <img src="downloadLocal.svg" alt="Download from LocalStorage">
+                    </button>
+                    <button onclick="uploadDataToServer()" title="Carga los datos a la DB">
+                        <img src="uploadData.svg" alt="Upload to DB">
+                    </button>
+                </div>
             </div>
 
 </body>
