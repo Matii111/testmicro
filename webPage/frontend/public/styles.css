@@ -31,3 +31,32 @@ body {
 .right-container {
     margin: 1rem;
 }
+
+.json-data {
+    display: flex;
+    overflow-y: scroll;
+    height: 15rem;
+    justify-content: center;
+}
+
+.data-container {
+    background-color: #ffffff;
+    white-space: pre-wrap;
+    padding: 10px;
+    margin-top: 20px;
+}
+
+.data-container>div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.data-container>div>button{
+    height: 3rem;
+    padding: 1rem;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
