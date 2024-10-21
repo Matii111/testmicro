@@ -21,11 +21,13 @@ const corsConfig = {
 app.use(cors(corsConfig));
 app.use(express.json({ limit: '10mb' }));
 
+app.use('/api', DataRouter);
+
 app.use(cors({ origin: '*' }));
 app.use(
     '/data.json',
     createProxyMiddleware({
-        target: `http://localhost:3000`,
+        target: `http://localhost:${PORT}`,
         changeOrigin: true,
         pathRewrite: {
             '^/data.json': '/data.json',
@@ -39,7 +41,7 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../../frontend/public', 'index.html'));
 });
 
-app.use('/api', DataRouter);
+
 
 async function initApp() {
     try {

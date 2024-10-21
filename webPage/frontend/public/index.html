@@ -13,6 +13,40 @@
     <script>
         const jsonData = 'http://localhost:5000/data.json';
         const savedDataArray = [];
+        //download data from db
+        async function downloadBackup() {
+            const response = await fetch('/api/DataSave', {
+                method: 'GET',
+            });
+
+            try {
+                if (!response.ok) {
+                    throw new Error(`Error al descargar datos: ${response.status}`);
+                }
+
+                const data = await response.json(); 
+                const keys = Object.keys(data[0]);
+                const csvContent = [
+                    keys.join(','), 
+                    ...data.map(item => keys.map(key => item[key]).join(','))
+                ].join('\n');
+
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+
+                const downloadLink = document.createElement('a');
+                downloadLink.href = URL.createObjectURL(blob);
+                downloadLink.download = 'backup.csv'; 
+
+                downloadLink.click();
+                URL.revokeObjectURL(downloadLink.href);
+
+                console.log('Documento descargado');
+
+            } catch (error) {
+                console.error('Error al descargar: ', error);
+            }
+        }
+
         //find data from json
         async function fetchData() {
             try {
@@ -81,13 +115,12 @@
                     throw new Error(`Error al enviar datos: ${response.status}`);
                 }
                 const result = await response.json();
-                console.log('Datos enviados al servidor:', parsedData);
                 console.log('Datos subidos exitosamente:', result);
             } catch (error) {
                 console.error('Error al subir datos:', error);
             }
         }
-
+        //updates data showed in UI
         function updateUI(data) {
             const arduino1 = data.COM5;
             const arduino2 = data.COM6;
@@ -150,12 +183,13 @@
             </div>
         </div>
 
-        <div id="data-display"
-            style="white-space: pre-wrap; background-color: #f3f3f3; padding: 10px; margin-top: 20px;">
+        <div id="data-display" class="data-container">
             <h2>Datos Guardados</h2>
-            <code id="saved-content">No hay datos disponibles aún.</code>
-        </div>
-    </div>
+            <div>
+                <code id="saved-content" class="json-data">No hay datos disponibles aún.</code>
+                <button onclick="downloadBackup()">Descargar ultimo backup
+                </button>
+            </div>
 
 </body>
 
