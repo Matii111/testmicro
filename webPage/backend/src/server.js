@@ -27,7 +27,7 @@ app.use(cors({ origin: '*' }));
 app.use(
     '/data.json',
     createProxyMiddleware({
-        target: `http://localhost:${PORT}`,
+        target: `http://localhost:${JSON}`,
         changeOrigin: true,
         pathRewrite: {
             '^/data.json': '/data.json',
