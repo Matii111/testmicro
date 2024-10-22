@@ -9,14 +9,15 @@ La pagina es ejecutada de manera local y redireccionada con nginx para su acceso
 Este frontend esta construido en HTML sin frameworks por temas de rendimiento y ahorro de memoria.
 
 ## Ejecucion 
-### JSON location
+### JSON Ejecucion local
 ```
 cd /frontend/jsonFiles
-python -m http.server 3000
+python -m http.server 3000 --bind <HOST IP>
 ```
 ### Backend - Static Frontend
 ```
-cd /background/src
+cd /backend/src
+npm i
 npm run start
 ```
 # Funcionalidades
