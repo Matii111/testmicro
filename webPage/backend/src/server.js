@@ -14,7 +14,7 @@ const MONGO = process.env.MONGO_URI;
 const IP = process.env.IP_HOST;
 
 const corsConfig = {
-    origin: `http://$(IP):${JSON}`,
+    origin: `http://192.168.137.73:5000`,
     methods: ['GET', 'POST'],
     credentials: false,
 };
@@ -30,7 +30,7 @@ app.use('/api', DataRouter);
 app.use(
     '/data.json',
     createProxyMiddleware({
-        target: `http://${IP}:${JSON}`, 
+        target: `http://192.168.137.243:3000`, 
         changeOrigin: true,
         pathRewrite: { '^/data.json': '/data.json' },
         logLevel: 'debug',
@@ -50,7 +50,7 @@ async function initApp() {
     try {
         await mongoose.connection.close();
         await connectDB(MONGO); 
-        app.listen(PORT, () => console.log(`Listening on ${IP}:${PORT}`)); 
+        app.listen(PORT, () => console.log(`Listening on 192.168.137.73:5000`)); 
     } catch (err) {
         console.error(err);
         process.exit(1); 

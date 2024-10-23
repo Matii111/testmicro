@@ -11,7 +11,7 @@
 <body>
 
     <script>
-        const jsonData = 'http://192.168.137.212:5000/data.json';
+        const jsonData = 'http://192.168.137.243:3000/data.json222';
         const savedDataArray = [];
 
         //download data from db
@@ -52,7 +52,7 @@
             const savedData = localStorage.getItem('savedData');
             const parsedData = JSON.parse(savedData);
             const stringData = parsedData.map(item =>
-                `${item.timestamp},${item.id},${item.device},${item.temperatura},${item.co2},${item.humedad},${item.uvs},${item.luminica}`
+                `${item.timestamp},${item.id},${item.temperature},${item.co2Levele},${item.humidity},${item.uvLevel},${item.light}`
             ).join('\n');
 
             const keys = Object.keys(parsedData[0]);
@@ -80,7 +80,6 @@
 
                 const dataString = await response.text();
                 const data = JSON.parse(dataString);
-
                 updateUI(data);
                 saveData(data);
                 saveDataToLocalStorage();
@@ -90,13 +89,19 @@
             }
         }
         //saves all data as arrays
-        function saveData(data) {
-            const combinedData = [...data.COM5, ...data.COM6];
-            combinedData.forEach(dataIndex => savedDataArray.push({
-                timestamp: new Date().toISOString(),
-                ...dataIndex
-            }));
-        }
+	function saveData(data) {
+	    const dataWithTimestamp = {
+	        timestamp: new Date().toISOString(),
+	        temperature: data.temperature,
+	        humidity: data.humidity,
+	        co2Level: data.co2Level,
+	        light: data.light,
+	        uvLevel: data.uvLevel
+	    };
+	    savedDataArray.push(dataWithTimestamp);
+	    console.log('Datos guardados:', savedDataArray);
+	}
+
         // transfers data to local storage
         function saveDataToLocalStorage() {
             if (savedDataArray.length === 0) {
@@ -144,32 +149,29 @@
             }
         }
         //updates data showed in UI
-        function updateUI(data) {
-            const arduino1 = data.COM5;
-            const arduino2 = data.COM6;
+	function updateUI(data) {
+	    console.log('Actualizando UI con:', data);
 
-            if (arduino1.length > 0) {
-                arduino1.forEach(index => {
-                    document.getElementById('dispositivo1').textContent = `Arduino Uno: ${index.device || 'N/A'}`;
-                    document.getElementById('temperatura1').textContent = `Temperatura: ${index.temperatura || 'N/A'} °C`;
-                    document.getElementById('nivelCO21').textContent = `Nivel de CO2: ${index.co2 || 'N/A'} ppm`;
-                    document.getElementById('nivelHumedad1').textContent = `Nivel de Humedad: ${index.humedad || 'N/A'} %`;
-                    document.getElementById('nivelRayosUV1').textContent = `Nivel de Rayos UV: ${index.uvs || 'N/A'}`;
-                    document.getElementById('intensidadLuminica1').textContent = `Intensidad Luminica: ${index.luminica || 'N/A'} lux`;
-                });
-            }
+	    // Seleccionamos los elementos HTML correspondientes
+	    const temperatura = document.getElementById('temperatura1');
+	    const humedad = document.getElementById('nivelHumedad1');
+	    const nivelCO2 = document.getElementById('nivelCO21');
+	    const luz = document.getElementById('intensidadLuminica1');
+	    const rayosUV = document.getElementById('nivelRayosUV1');
 
-            if (arduino2.length > 0) {
-                arduino2.forEach(index => {
-                    document.getElementById('dispositivo2').textContent = `Arduino Uno: ${index.device || 'N/A'}`;
-                    document.getElementById('temperatura2').textContent = `Temperatura: ${index.temperatura || 'N/A'} °C`;
-                    document.getElementById('nivelCO22').textContent = `Nivel de CO2: ${index.co2 || 'N/A'} ppm`;
-                    document.getElementById('nivelHumedad2').textContent = `Nivel de Humedad: ${index.humedad || 'N/A'} %`;
-                    document.getElementById('nivelRayosUV2').textContent = `Nivel de Rayos UV: ${index.uvs || 'N/A'}`;
-                    document.getElementById('intensidadLuminica2').textContent = `Intensidad Luminica: ${index.luminica || 'N/A'} lux`;
-                });
-            }
-        }
+	    // Verificamos que todos los elementos existan antes de actualizar
+	    if (temperatura && humedad && nivelCO2 && luz && rayosUV) {
+	        temperatura.textContent = `Temperatura: ${data.temperature}°C`;
+	        humedad.textContent = `Humedad: ${data.humidity}%`;
+	        nivelCO2.textContent = `Nivel de CO2: ${data.co2Level} ppm`;
+	        luz.textContent = `Intensidad Luminosa: ${data.light} lux`;
+	        rayosUV.textContent = `Nivel de Rayos UV: ${data.uvLevel}`;
+	    } else {
+	        console.error('Error: No se encontraron algunos elementos HTML');
+	    }
+	}
+        
+
         async function initialize() {
             await fetchData();
         }
@@ -193,28 +195,19 @@
 
     </script>
 
-    <div>
+    <div class="main-container">
         <h1 class="main-title">Estación Meteorológica</h1>
         <div class="arduino-container">
             <div class="left-container" id="app1">
                 <div>
-                    <h2 id="dispositivo1">Conectando dispositivo...</h2>
+                    <h2 id="dispositivo1">ESP82</h2>
                     <p id="temperatura1">Temperatura: Cargando...</p>
                     <p id="nivelCO21">Nivel de CO2: Cargando...</p>
                     <p id="nivelHumedad1">Nivel de Humedad: Cargando...</p>
                     <p id="nivelRayosUV1">Nivel de Rayos UV: Cargando...</p>
                     <p id="intensidadLuminica1">Intensidad Luminica: Cargando...</p>
                 </div>
-            </div>
-            <div class="left-container" id="app2">
-                <div>
-                    <h2 id="dispositivo2">Conectando dispositivo...</h2>
-                    <p id="temperatura2">Temperatura: Cargando...</p>
-                    <p id="nivelCO22">Nivel de CO2: Cargando...</p>
-                    <p id="nivelHumedad2">Nivel de Humedad: Cargando...</p>
-                    <p id="nivelRayosUV2">Nivel de Rayos UV: Cargando...</p>
-                    <p id="intensidadLuminica2">Intensidad Luminica: Cargando...</p>
-                </div>
+            </div>        
             </div>
         </div>
 
