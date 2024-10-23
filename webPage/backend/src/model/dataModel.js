@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
 
 const dataSchema = new mongoose.Schema({
-    timestamp: { type: Date, required: true },
-    device: { type: String, required: true },
-    temperatura: { type: Number, required: true },
-    co2: { type: Number, required: true },
-    humedad: { type: Number, required: true },
-    uvs: { type: Number, required: false },
-    luminica: { type: Number, required: false }
+    timestamp: { type: Date, required: false },
+    temperature: { type: Number, required: false },
+    co2Level: { type: Number, required: false },
+    light: { type: Number, required: false },
+    uvLevel: { type: Number, required: false },
+    humidity: { type: Number, required: false },
 });
 
 module.exports = mongoose.model('Data', dataSchema);
